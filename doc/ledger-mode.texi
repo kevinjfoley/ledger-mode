@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @end copying
 
-@dircategory Major Modes
+@dircategory Emacs
 @direntry
 * Ledger Mode: (ledger-mode).           Command-Line Accounting
 @end direntry
@@ -159,7 +159,7 @@ Ledger from a convenient command line.
 @kindex C-c C-a
 
 As simple as the Ledger transaction format is, it can still be daunting
-to add many transactions manually.  Ledger provides two way to add
+to add many transactions manually.  Ledger provides two ways to add
 transactions with minimal typing. Both are based on the idea that most
 transactions are repetitions of earlier transactions.
 
@@ -202,7 +202,7 @@ Emacs will then prompt for a target value.  The target value is the
 amount you want the cleared transactions in the buffer to total.
 Normally this would be the ending value from your bank statement, or the
 latest value in your on-line transaction summary.  Enter @samp{1710}.
-Note that Ledger-mode assumes your are using @samp{$} (USD) as your
+Note that Ledger-mode assumes you are using @samp{$} (USD) as your
 default commodity, this can be easily changed in the customization
 variables. @xref{Ledger-mode Customization}.
 
@@ -313,7 +313,7 @@ posting.
 @cindex balance
 
 You will often want to quickly check the balance of an account.  The
-easiest way it to position point on the account you are interested in,
+easiest way is to position point on the account you are interested in,
 and type @kbd{C-c C-p}.  The Minibuffer will ask you to verify the name
 of the account you want, if it is already correct hit @kbd{RET}, then
 the balance of the account will be displayed in the Minibuffer.
@@ -347,7 +347,7 @@ type @kbd{y} to yank the value at the top of stack back into the ledger
 buffer.  Note: @command{Calc} does not directly support commas as
 decimal separators.  Ledger-mode will translate values from
 decimal-comma format to decimal-period format for use in @command{Calc},
-but it cannot intercept the value being yanked form the @command{Calc}
+but it cannot intercept the value being yanked from the @command{Calc}
 stack, so decimal-comma users will have to manually replace the period
 with a comma.
 
@@ -455,7 +455,7 @@ markup within your ledger.  For example:
 
 You can use menu entries @samp{Mark Sort Beginning} to insert start and
 @samp{Mark Sort End} to insert end markers.  These functions will
-automatically delete old markers and put new new marker at point.
+automatically delete old markers and put new marker at point.
 
 @node Narrowing Transactions,  , Sorting Transactions, The Ledger Buffer
 @section Narrowing Transactions
@@ -918,8 +918,8 @@ Ledger-mode has several options available for configuration.  All
 options can be configured through the Emacs customization menus, or
 specified in your Emacs initialization file.  The complete list of
 options is shown below. To change the option using the Emacs
-customization menu, simply chose customize in the Options menu and look
-for Ledger under the data options.  Alternately you can choose
+customization menu, simply choose customize in the Options menu and look
+for Ledger under the data options.  Alternatively you can choose
 @samp{Customize Specific Group} and enter @samp{Ledger} as the group.
 
 @node Customization Variables,  , Ledger-mode Customization, Customizing Ledger-mode
