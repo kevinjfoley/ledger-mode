@@ -101,16 +101,14 @@
                         (org-read-date nil t nil prompt))))
 
 (defun ledger-get-minibuffer-prompt (prompt default)
-  "Return a string composing of PROMPT and DEFAULT appropriate
-for a minibuffer prompt."
+  "Return a string composing of PROMPT and DEFAULT appropriate for a minibuffer prompt."
   (concat prompt
           (if default
               (concat " (" default "): ")
             ": ")))
 
 (defun ledger-completing-read-with-default (prompt default collection)
-  "Return a user supplied string after PROMPT, or DEFAULT while
-  providing completions from COLLECTION."
+  "Return a user supplied string after PROMPT, or DEFAULT while providing completions from COLLECTION."
   (completing-read (ledger-get-minibuffer-prompt prompt default)
                    collection nil nil nil 'ledger-minibuffer-history default))
 
@@ -123,7 +121,7 @@ for a minibuffer prompt."
   "Display the cleared-or-pending balance.
 And calculate the target-delta of the account being reconciled.
 
-With prefix argument \\[universal-argument] ask for the target commodity and convert
+With ARG (\\[universal-argument]) ask for the target commodity and convert
 the balance into that."
   (interactive "P")
   (let* ((account (ledger-read-account-with-prompt "Account balance to show"))
@@ -148,17 +146,6 @@ And calculate the target-delta of the account being reconciled."
                     (buffer-substring-no-properties (point-min) (1- (point-max))))))
     (when balance
       (message balance))))
-
-(defun ledger-magic-tab (&optional interactively)
-  "Decide what to with with <TAB>, INTERACTIVELY.
-Can indent, complete or align depending on context."
-  (interactive "p")
-  (if (= (point) (line-beginning-position))
-      (indent-to ledger-post-account-alignment-column)
-    (if (and (> (point) 1)
-             (looking-back "\\([^ \t]\\)" 1))
-        (ledger-pcomplete interactively)
-      (ledger-post-align-postings (line-beginning-position) (line-end-position)))))
 
 (defvar ledger-mode-abbrev-table)
 
@@ -264,9 +251,7 @@ With a prefix argument, remove the effective date."
     (define-key map [(control ?c) (control ?l)] #'ledger-display-ledger-stats)
     (define-key map [(control ?c) (control ?q)] #'ledger-post-align-xact)
 
-    (define-key map [tab] #'ledger-magic-tab)
     (define-key map [(control tab)] #'ledger-post-align-xact)
-    (define-key map [(control ?i)] #'ledger-magic-tab)
     (define-key map [(control ?c) tab] #'ledger-fully-complete-xact)
     (define-key map [(control ?c) (control ?i)] #'ledger-fully-complete-xact)
 
@@ -330,17 +315,14 @@ With a prefix argument, remove the effective date."
   (setq font-lock-defaults
         '(ledger-font-lock-keywords t nil nil nil))
   (add-hook 'font-lock-extend-region-functions 'ledger-fontify-extend-region)
-
-  (setq-local pcomplete-parse-arguments-function 'ledger-parse-arguments)
-  (setq-local pcomplete-command-completion-function 'ledger-complete-at-point)
-  (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)
+  (add-hook 'completion-at-point-functions #'ledger-complete-at-point nil t)
   (add-hook 'after-save-hook 'ledger-report-redo nil t)
 
   (add-hook 'post-command-hook 'ledger-highlight-xact-under-point nil t)
 
   (ledger-init-load-init-file)
   (setq-local comment-start ";")
-
+  (setq-local indent-line-function #'ledger-indent-line)
   (setq-local indent-region-function 'ledger-post-align-postings))
 
 ;;;###autoload

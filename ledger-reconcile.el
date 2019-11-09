@@ -59,8 +59,9 @@
   :group 'ledger-reconcile)
 
 (defcustom ledger-buffer-tracks-reconcile-buffer t
-  "If t, then when the cursor is moved to a new transaction in the reconcile buffer.
-Then that transaction will be shown in its source buffer."
+  "If t, move point in the ledger buffer when it moves in the reconcile buffer.
+When the cursor is moved to a new transaction in the reconcile
+buffer then that transaction will be shown in its source buffer."
   :type 'boolean
   :group 'ledger-reconcile)
 
@@ -77,7 +78,7 @@ reconcile-finish will mark all pending posting cleared."
 
 (defcustom ledger-reconcile-default-date-format ledger-default-date-format
   "Date format for the reconcile buffer.
-Default is ledger-default-date-format."
+Default is `ledger-default-date-format'."
   :type 'string
   :group 'ledger-reconcile)
 
@@ -101,8 +102,8 @@ amount.  The format for each field is %WIDTH(FIELD), WIDTH can be
 preced by a minus sign which mean to left justify and pad the
 field.  WIDTH is the minimum number of characters to display;
 if string is longer, it is not truncated unless
-ledger-reconcile-buffer-payee-max-chars or
-ledger-reconcile-buffer-account-max-chars is defined."
+`ledger-reconcile-buffer-payee-max-chars' or
+`ledger-reconcile-buffer-account-max-chars' is defined."
   :type 'string
   :group 'ledger-reconcile)
 
@@ -181,7 +182,7 @@ Possible values are '(date)', '(amount)', '(payee)' or '(0)' for no sorting, i.e
     ;; split arguments like the shell does, so you need to
     ;; specify the individual fields in the command line.
     (ledger-exec-ledger buffer (current-buffer)
-                        "balance" "--limit" "cleared or pending" "--empty" "--collapse"
+                        "balance" "--real" "--limit" "cleared or pending" "--empty" "--collapse"
                         "--format" "%(scrub(display_total))" account)
     (ledger-split-commodity-string
      (buffer-substring-no-properties (point-min) (point-max)))))
@@ -511,14 +512,14 @@ moved and recentered.  If they aren't strange things happen."
     (pop-to-buffer rbuf)))
 
 (defun ledger-reconcile-check-valid-account (account)
-  "Check to see if ACCOUNT exists in the ledger file"
+  "Check to see if ACCOUNT exists in the ledger file."
   (if (> (length account) 0)
       (save-excursion
         (goto-char (point-min))
         (search-forward account nil t))))
 
 (defun ledger-reconcile (&optional account target)
-  "Start reconciling, prompt for account."
+  "Start reconciling, prompt for ACCOUNT."
   (interactive)
   (let ((account (or account (ledger-read-account-with-prompt "Account to reconcile")))
         (buf (current-buffer))
@@ -560,7 +561,7 @@ moved and recentered.  If they aren't strange things happen."
 (defvar ledger-reconcile-mode-abbrev-table)
 
 (defun ledger-reconcile-change-target (&optional target)
-  "Change the target amount for the reconciliation process."
+  "Change the TARGET amount for the reconciliation process."
   (interactive)
   (setq ledger-target (or target (ledger-read-commodity-string ledger-reconcile-target-prompt-string))))
 

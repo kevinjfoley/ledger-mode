@@ -103,37 +103,42 @@ Requires empty line separating xacts."
     (list (ledger-navigate-beginning-of-xact)
           (ledger-navigate-end-of-xact))))
 
+(defun ledger-navigate-skip-lines-backwards (re)
+  "Move backwards if necessary until RE does not match at the beginning of the line."
+  (beginning-of-line)
+  (while (and (looking-at-p re)
+              (zerop (forward-line -1)))))
+
+(defun ledger-navigate-skip-lines-forwards (re)
+  "Move forwards if necessary until RE does not match at the beginning of the line."
+  (beginning-of-line)
+  (while (and (looking-at-p re)
+              (zerop (forward-line 1)))))
+
 (defun ledger-navigate-find-directive-extents (pos)
   "Return the extents of the directive at POS."
   (goto-char pos)
-  (let ((begin (progn (beginning-of-line)
-                      (while (looking-at "[ \t]\\|end[[:blank:]]+\\(?:comment\\|test\\)")
-                        (forward-line -1))
+  (let ((begin (progn (ledger-navigate-skip-lines-backwards "[ \t]\\|end[[:blank:]]+\\(?:comment\\|test\\)")
                       (point)))
         (end (progn (forward-line 1)
-                    (while (looking-at "[ \t]")
-                      (forward-line 1))
-                    (point))))
+                    (ledger-navigate-skip-lines-forwards "[ \t]")
+                    (point)))
+        (comment-re " *;"))
     ;; handle block comments here
     (goto-char begin)
     (cond
-     ((looking-at " *;")
+     ((looking-at comment-re)
       (progn
-        (while (and (looking-at " *;")
-                    (> (point) (point-min)))
-          (forward-line -1))
+        (ledger-navigate-skip-lines-backwards comment-re)
         ;; We are either at the beginning of the buffer, or we found
         ;; a line outside the comment, or both.  If we are outside
         ;; the comment then we need to move forward a line.
-        (unless (looking-at " *;")
+        (unless (looking-at comment-re)
           (forward-line 1)
           (beginning-of-line))
         (setq begin (point))
         (goto-char pos)
-        (beginning-of-line)
-        (while (and (looking-at " *;")
-                    (< (point) (point-max)))
-          (forward-line 1))
+        (ledger-navigate-skip-lines-forwards comment-re)
         (setq end (point))))
      ((looking-at "\\(?:comment\\|test\\)\\>")
       (setq end (or (save-match-data
@@ -148,20 +153,17 @@ Requires empty line separating xacts."
   (let ((begin (progn (beginning-of-line)
                       (point)))
         (end (progn (end-of-line)
-                    (point))))
+                    (point)))
+        (comment-re " *;"))
     ;; handle block comments here
     (beginning-of-line)
-    (if (looking-at " *;")
+    (if (looking-at comment-re)
         (progn
-          (while (and (looking-at " *;")
-                      (> (point) (point-min)))
-            (forward-line -1))
+          (ledger-navigate-skip-lines-backwards comment-re)
           (setq begin (point))
           (goto-char pos)
           (beginning-of-line)
-          (while (and (looking-at " *;")
-                      (< (point) (point-max)))
-            (forward-line 1))
+          (ledger-navigate-skip-lines-forwards comment-re)
           (setq end (point))))
     (list begin end)))
 
@@ -172,11 +174,30 @@ Requires empty line separating xacts."
   (save-excursion
     (goto-char pos)
     (beginning-of-line)
-    (while (looking-at "[ \t]\\|end[[:blank:]]+\\(?:comment\\|test\\)\\_>")
-      (forward-line -1))
+    (ledger-navigate-skip-lines-backwards "[ \t]\\|end[[:blank:]]+\\(?:comment\\|test\\)\\_>")
     (if (looking-at "[=~0-9\\[]")
         (ledger-navigate-find-xact-extents pos)
       (ledger-navigate-find-directive-extents pos))))
+
+(defun ledger-navigate-next-uncleared ()
+  "Move point to the next uncleared transaction."
+  (interactive)
+  (when (looking-at ledger-payee-uncleared-regex)
+    (forward-line))
+  (if (re-search-forward ledger-payee-uncleared-regex nil t)
+      (progn (beginning-of-line)
+             (point))
+    (user-error "No next uncleared transactions")))
+
+(defun ledger-navigate-previous-uncleared ()
+  "Move point to the previous uncleared transaction."
+  (interactive)
+  (when (equal (car (ledger-context-at-point)) 'acct-transaction)
+    (ledger-navigate-beginning-of-xact))
+  (if (re-search-backward ledger-payee-uncleared-regex nil t)
+      (progn (beginning-of-line)
+             (point))
+    (user-error "No previous uncleared transactions")))
 
 
 (provide 'ledger-navigate)

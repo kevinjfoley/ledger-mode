@@ -29,6 +29,10 @@
 (require 'flymake)
 (require 'ledger-exec)                  ; for `ledger-binary-path'
 
+;; To silence byte compiler warnings in Emacs 25 and older:
+(declare-function flymake-diag-region "flymake" (buffer line &optional col))
+(declare-function flymake-make-diagnostic "flymake" (buffer beg end type text &optional data overlay-properties))
+
 (defvar-local ledger--flymake-proc nil)
 
 (defcustom ledger-flymake-be-pedantic nil
@@ -36,6 +40,7 @@
 If --pedantic is in your ledgerrc file, then --pedantic gets
 passed regardless of the value."
   :type 'boolean
+  :package-version '(ledger-mode . "4.0.0")
   :group 'ledger)
 
 (defcustom ledger-flymake-be-explicit nil
@@ -43,6 +48,7 @@ passed regardless of the value."
 If --explicit is in your ledgerrc file, then --explicit gets
 passed regardless of the value."
   :type 'boolean
+  :package-version '(ledger-mode . "4.0.0")
   :group 'ledger)
 
 ;; Based on the example from Flymake's info:

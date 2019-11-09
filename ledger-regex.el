@@ -19,8 +19,16 @@
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 ;; MA 02110-1301 USA.
 
+
+;;; Commentary:
+;; Regular expressions used by ledger-mode.
+
+;;; Code:
+
 (require 'rx)
 (require 'cl-lib)
+
+(defvar ledger-iso-date-regex)
 
 (defconst ledger-amount-regex
   (concat "\\(  \\|\t\\| \t\\)[ \t]*-?"
@@ -71,28 +79,28 @@
 (defconst ledger-init-string-regex
   "^--.+?\\($\\|[ ]\\)")
 
-(defconst ledger-account-directive-regex
-  "^account [ \t]*\\(?2:[^;]+?\\)\\(?3:[ \t]*\\)\\(;.*\\)?$")
+(defconst ledger-account-name-regex
+  "\\(?1:[^][(); \t\r\n]+\\(?: [^][(); \t\r\n]+\\)*\\)")
 
-(defconst ledger-account-any-status-no-trailing-spaces-regex
-  "^[ \t]+\\(?1:[*!]\\s-+\\)?[[(]?\\(?2:[^; ].+?\\)[])]?")
+(defconst ledger-account-directive-regex
+  (concat "^account[ \t]+" ledger-account-name-regex))
+
+(defconst ledger-account-name-maybe-virtual-regex
+  (concat "[[(]?" ledger-account-name-regex "[])]?"))
 
 (defconst ledger-account-any-status-regex
-  (format "%s%s"
-          ledger-account-any-status-no-trailing-spaces-regex
-          "\\(?3:\t\\| [ \t]\\|$\\)"))
+  (concat "^[ \t]+\\(?:[!*][ \t]*\\)?" ledger-account-name-maybe-virtual-regex))
 
+;; This would incorrectly match "account (foo)", but writing the regexp this way
+;; allows us to have just one match result
 (defconst ledger-account-name-or-directive-regex
-  (format "\\(?:%s\\|%s\\(?3:\t\\| [ \t]\\)\\)"
-          ledger-account-directive-regex
-          ledger-account-any-status-no-trailing-spaces-regex))
+  (format "\\(?:%s\\|%s\\)" ledger-account-any-status-regex ledger-account-directive-regex))
 
 (defconst ledger-account-pending-regex
-  "\\(^[ \t]+\\)\\(!\\s-*[^ ].*?\\)\\(  \\|\t\\|$\\)")
+  (concat "\\(^[ \t]+\\)!" ledger-account-name-maybe-virtual-regex))
 
 (defconst ledger-account-cleared-regex
-  "\\(^[ \t]+\\)\\(*\\s-*[^ ].*?\\)\\(  \\|\t\\|$\\)")
-
+  (concat "\\(^[ \t]+\\)*" ledger-account-name-maybe-virtual-regex))
 
 (defmacro ledger-define-regexp (name regex docs &rest args)
   "Simplify the creation of a Ledger regex and helper functions."
@@ -402,3 +410,5 @@
 
 
 (provide 'ledger-regex)
+
+;;; ledger-regex.el ends here
